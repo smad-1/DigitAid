@@ -20,8 +20,8 @@ import time
 
 
 def take_screenshot(digit, images_folder):
-    for i in range(20, 30):
-        time.sleep(8)
+    for i in range(70, 90):
+        time.sleep(3)
         im = ImageGrab.grab(bbox=(160, 300, 650, 800))  # x1,y1,x2,y2
         print("Image Captured", i)
         im.save(images_folder + digit + str(i) + '.png')
@@ -234,7 +234,7 @@ while True:
     cv2.namedWindow("Result")
     cv2.imshow("Result", im)
 
-    key = cv2.waitKey(0)
+    key = cv2.waitKey(1000)
     if key == 13:  # 27 is the ascii value of esc, 13 is the ascii value of enter
         break
 cv2.destroyAllWindows()
