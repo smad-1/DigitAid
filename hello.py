@@ -1,7 +1,7 @@
 # DATA COLLECTION FROM PAINT
 
 # %%
-import numpy as np  # pip install numpy
+import numpy as np  # type: ignore # pip install numpy
 from sklearn import metrics
 from sklearn.svm import SVC
 import joblib
