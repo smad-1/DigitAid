@@ -13,13 +13,15 @@ import csv
 import glob
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.models import load_model
-from tensorflow import keras
-from tensorflow.keras import layers
-from tensorflow.keras.models import Sequential
+# from tensorflow.keras.models import load_model
+# from tensorflow import keras
+# from tensorflow.keras import layers
+# from tensorflow.keras.models import Sequential
 # %%
+import tensorflow as tf
+print("TensorFlow version:", tf.__version__)
 
-
+#%%
 def create_rectangular_button(parent, text, command, x, y, width=400, height=40):
     canvas = tk.Canvas(parent, width=width, height=height,
                        bd=0, highlightthickness=0, relief='ridge')
@@ -54,7 +56,7 @@ window = tk.Tk()
 window.title("DigitAid - Handwritten Digit Recognition")
 
 # the provided image
-image_path = "D:/IUT/CSE/6th sem/Project_DigitAid/digits_bg.png"  # use the local path
+image_path = "C:/Users/HP/Desktop/ml project/DigitAid/digits_bg.png"  # use the local path
 background_image_pil = Image.open(image_path)
 background_image = ImageTk.PhotoImage(background_image_pil)
 
@@ -225,7 +227,10 @@ def open_train_model_window():
 
         # Evaluate CNN Model
         cnn_loss, cnn_accuracy = cnn_model.evaluate(test_x_cnn, test_y_cnn)
+        messagebox.showinfo("Result", f"Accuracy = {cnn_accuracy}")
         print(f"CNN Model Accuracy: {cnn_accuracy * 100:.2f}%")
+        # _, acc = model.evaluate(test_x_cnn, test_y_cnn)
+        # messagebox.showinfo("Result", f"Accuracy = {acc}")
 
     create_rectangular_button(
         train_window, "Train CNN Model", train_cnn, center_x, 150)
@@ -238,7 +243,30 @@ def open_train_model_window():
 
 create_rectangular_button(window, "Train Model",
                           open_train_model_window, center_x, 250)
+def open_how_to_use_window():
+    how_to_use_window = tk.Toplevel(window)
+    how_to_use_window.title("How to Use DigitAid")
+    how_to_use_window.geometry(f"{image_width}x{image_height}")
+    how_to_use_background_label = tk.Label(how_to_use_window, image=background_image)
+    how_to_use_background_label.place(relwidth=1, relheight=1)
+    how_to_use_heading = tk.Label(how_to_use_window, text="How to Use DigitAid", font=('Aerial', 20, 'bold'), bg='lightblue', fg='black')
+    how_to_use_heading.pack(pady=(20, 10))
+    
+    instructions = [
+        
+        "1. Give the input from  digits (0-9) for which you want to provide data.",
+        "2. Then use the 'Capture Data' button to provide your handwritten digit samples.",
+        "3. To generate a dataset from the captured images use the 'Generate Dataset' button.",
+        "4. To train a model (SVM or CNN) use the 'Train Model' button.",
+        "5. Finally Use the 'Live Prediction' button to test the trained model on new handwritten digits ",
+        "and get the prediction of your written digits."
+    ]
+    
+    for instruction in instructions:
+        label = tk.Label(how_to_use_window, text=instruction, font=('Aerial', 15), bg='lightblue', fg='blue', anchor='w', justify='left')
+        label.pack(fill='both', padx=20, pady=5)
 
+create_rectangular_button(window, "How to Use", open_how_to_use_window, center_x, 350)
 
 def open_live_prediction_window():
     prediction_window = tk.Toplevel(window)
@@ -265,7 +293,7 @@ def open_live_prediction_window():
         return roi
 
     def predict_self_made():
-        os.startfile("C:/Users/GIGABYTE/Desktop/Paint - Shortcut.lnk")
+        os.startfile("C:/Users/HP/Desktop/Paint - Shortcut.lnk")
         model = joblib.load("models/svm_self_dataset")
         cnn_model = tf.keras.models.load_model('models/cnn_self_dataset.keras')
         images_folder = "predictions/"
@@ -320,7 +348,7 @@ def open_live_prediction_window():
 
     def predict_aug_cnn():
         # Open the Paint application or any other drawing tool
-        os.startfile("C:/Users/GIGABYTE/Desktop/Paint - Shortcut.lnk")
+        os.startfile("C:/Users/HP/Desktop/Paint - Shortcut.lnk")
 
         # Load the augmented CNN model
         model = tf.keras.models.load_model("models/augmented_cnn.keras")
@@ -368,7 +396,7 @@ def open_live_prediction_window():
     # need to implement this
 
     def predict_mnist_svm():
-        os.startfile("C:/Users/GIGABYTE/Desktop/Paint - Shortcut.lnk")
+        os.startfile("C:/Users/HP/Desktop/Paint - Shortcut.lnk")
         # model = joblib.load("models/svm_mnist")
         model, pca = joblib.load("models/svm_mnist")
         images_folder = "predictions/"
@@ -429,10 +457,11 @@ def open_live_prediction_window():
 
 
 create_rectangular_button(window, "Live prediction",
-                          open_live_prediction_window, center_x, 350)
+                          open_live_prediction_window, center_x, 300)
 
 # reference to the background image to avoid garbage collection
 window.background_image = background_image
 
 window.mainloop()
+# %%
 # %%
