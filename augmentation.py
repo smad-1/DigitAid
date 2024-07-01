@@ -7,10 +7,11 @@ import cv2
 import os
 import PIL
 import tensorflow as tf
-
+import seaborn as sns
 from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
+from sklearn.metrics import confusion_matrix, classification_report
 
 # %%
 data_dir = "screenshots"
@@ -127,11 +128,27 @@ model.compile(optimizer='adam',
                   from_logits=True),
               metrics=['accuracy'])
 
-model.fit(X_train_scaled, y_train, epochs=30)
+# Fit the model and store the training history
+history = model.fit(X_train_scaled, y_train, epochs=30)
+
+# Get the training accuracy from the history
+training_accuracy = history.history['accuracy']
+
+# Print the training accuracy for each epoch
+for epoch, accuracy in enumerate(training_accuracy, start=1):
+    print(f"Epoch {epoch}: Training Accuracy: {accuracy * 100:.2f}%")
+
+
+# %%
+final_training_accuracy = training_accuracy[-1]
+print(f"Final Training Accuracy: {final_training_accuracy * 100:.2f}%")
+
 
 # %%
 
-model.evaluate(X_test_scaled, y_test)
+loss, accuracy = model.evaluate(X_test_scaled, y_test)
+print(f"Test Accuracy: {accuracy * 100:.2f}%")
+
 
 # %%
 # Here we see that while train accuracy is very high (99%), the test accuracy is significantly low (89.99%) indicating overfitting. Let's make some predictions before we use data augmentation to address overfitting
@@ -175,6 +192,23 @@ plt.imshow(X[0])
 
 plt.axis('off')
 plt.imshow(data_augmentation(X)[0].numpy().astype("uint8"))
+
+# %%
+
+# Visualize some digits
+
+plt.figure(figsize=(14, 12))
+for digit_num in range(0, 30):
+    idx = np.random.randint(0, len(X))
+    augmented_image = data_augmentation(np.expand_dims(X[idx], axis=0))[
+        0].numpy().astype("uint8")
+    plt.subplot(7, 10, digit_num+1)
+    # grid_data = X.iloc[digit_num].values.reshape(28, 28)
+    plt.imshow(augmented_image, interpolation="none", cmap="afmhot")
+    plt.xticks([])
+    plt.yticks([])
+plt.tight_layout()
+
 # %%
 # <matplotlib.image.AxesImage at 0x15c049d6490>
 
@@ -200,11 +234,70 @@ model.compile(optimizer='adam',
                   from_logits=True),
               metrics=['accuracy'])
 
-model.fit(X_train_scaled, y_train, epochs=30)
+# Fit the model and store the training history
+history = model.fit(X_train_scaled, y_train, epochs=30)
+
+# Get the training accuracy from the history
+training_accuracy = history.history['accuracy']
+
+# Print the training accuracy for each epoch
+for epoch, accuracy in enumerate(training_accuracy, start=1):
+    print(f"Epoch {epoch}: Training Accuracy: {accuracy * 100:.2f}%")
+
 
 # %%
-model.evaluate(X_test_scaled, y_test)
+final_training_accuracy = training_accuracy[-1]
+print(f"Final Training Accuracy: {final_training_accuracy * 100:.2f}%")
 
+# %%
+loss, accuracy = model.evaluate(X_test_scaled, y_test)
+print(f"Test Accuracy: {accuracy * 100:.2f}%")
+
+# %%
+# Generate predictions
+predictions = model.predict(X_test_scaled)
+
+# Convert predictions to class labels
+predicted_labels = np.argmax(predictions, axis=1)
+
+# Generate the classification report
+print(classification_report(y_test, predicted_labels,
+      target_names=digit_labels_dict.keys()))
+# %%
+
+# LOSS GRAPH
+# Plot training & validation loss values
+plt.figure(figsize=(10, 6))
+plt.plot(history.history['loss'], label='Training Loss')
+plt.title('Model Training Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend(loc='upper right')
+plt.grid(True)
+plt.show()
+
+# %%
+# Plot training accuracy values
+plt.figure(figsize=(10, 6))
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.title('Model Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend(loc='lower right')
+plt.grid(True)
+plt.show()
+
+# %%
+# Calculate confusion matrix
+cm = confusion_matrix(y_test, predicted_labels)
+# Plot confusion matrix
+plt.figure(figsize=(10, 8))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False,
+            xticklabels=digit_labels_dict.keys(), yticklabels=digit_labels_dict.keys())
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
 # %%
 # Define the path to save the model
 models_dir = "models"

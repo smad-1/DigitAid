@@ -1,49 +1,3 @@
-# # %%
-# from sklearn.utils import shuffle
-# from sklearn import metrics
-# import joblib
-# from sklearn.svm import SVC
-# from sklearn.model_selection import train_test_split
-# import numpy as np
-# import pandas as pd
-# import matplotlib.pyplot as plt
-
-# # %%
-
-# # load data
-
-# d = pd.read_csv("./mnist/mnist_train.csv")
-
-# print(d.head(5))
-
-# # %%
-
-# Y = d['label']
-
-# X = d.drop("label", axis=1)
-
-# print(X.head(5))
-
-# # %%
-
-# idx = 114
-# img = X.loc[idx].values.reshape(28, 28)
-# print(Y[idx])
-# plt.imshow(img)
-
-# # %%
-
-# # train
-
-# train_x, test_x, train_y, test_y = train_test_split(X, Y, test_size=0.2)
-# # %%
-
-# # fit to model
-# classifier = SVC(kernel="linear", random_state=6, verbose=True)
-# classifier.fit(train_x, train_y)
-# joblib.dump(classifier, "models/svm_mnist")
-
-
 # %%
 
 import joblib
@@ -57,27 +11,46 @@ from sklearn.decomposition import PCA
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn import metrics
+from sklearn.metrics import confusion_matrix, classification_report
 
 # %%
 
 # LOAD DATA
 
-train = pd.read_csv('./mnist/mnist_train.csv')
-test = pd.read_csv('./mnist/mnist_test.csv')
+train = pd.read_csv('./mnist2/mnist_train.csv')
+test = pd.read_csv('./mnist2/mnist_test.csv')
 
 train.head()
 
 # %%
 test.head()
+
 # %%
 
-train_shuffled = shuffle(train.values, random_state=0)
-X = train.drop(labels=["label"], axis=1)
-y = train["label"]
-# X_test = test.values
+# Binarize images
 
-X_train, X_val, y_train, y_val = train_test_split(
-    X, y, test_size=0.2, random_state=0)
+
+def binarize_image(data, threshold=128):
+    binarized_data = np.where(data > threshold, 255, 0)
+    return binarized_data
+
+
+# Binarize the training and testing images
+X_train = binarize_image(train.drop(labels=["label"], axis=1))
+y_train = train["label"]
+X_test = binarize_image(test.drop(labels=["label"], axis=1))
+y_test = test["label"]
+
+# %%
+# Shuffle the data
+train_shuffled = shuffle(train.values, random_state=0)
+test_shuffled = shuffle(test.values, random_state=0)
+# %%
+# Reshape the data to match the original structure
+X_train = pd.DataFrame(X_train, columns=train.columns[1:])
+y_train = train["label"]
+X_test = pd.DataFrame(X_test, columns=test.columns[1:])
+y_test = test["label"]
 
 # print(f'X_train = {X_train.shape}, y =
 # {y_train.shape}, X_test = {X_test.shape}')
@@ -107,7 +80,7 @@ counts = sns.countplot(x="label", data=train, palette="Set1")
 scaler = MinMaxScaler(feature_range=(-1, 1))
 scaler.fit(X_train)
 normalized_X_train = scaler.transform(X_train)
-normalized_X_val = scaler.transform(X_val)
+normalized_X_test = scaler.transform(X_test)
 
 # %%
 
@@ -115,7 +88,7 @@ normalized_X_val = scaler.transform(X_val)
 
 pca = PCA(n_components=0.90)
 pca_X_train = pca.fit_transform(normalized_X_train)
-pca_X_val = pca.transform(normalized_X_val)
+pca_X_test = pca.transform(normalized_X_test)
 # print(f'{pca.explained_variance_} \n Number of PCA Vectors = {
 #       len(pca.explained_variance_)}')
 
@@ -142,7 +115,7 @@ classifier.fit(pca_X_train, y_train)
 # joblib.dump(classifier, "models/svm_mnist")
 
 # Save the model and PCA object
-joblib.dump((classifier, pca), "models/svm_mnist")
+joblib.dump((classifier, pca, scaler), "models/svm_mnist")
 
 train_accuracy = classifier.score(pca_X_train, y_train)
 print(f"Training Accuracy: {train_accuracy*100:.3f}%")
@@ -151,7 +124,32 @@ print(f"Training Accuracy: {train_accuracy*100:.3f}%")
 
 # prediction
 
-predictions = classifier.predict(pca_X_val)
-print("Accuracy= ", metrics.accuracy_score(predictions, y_val))
+predictions = classifier.predict(pca_X_test)
+accuracy = metrics.accuracy_score(predictions, y_test)
+print(f"Accuracy: {accuracy * 100:.2f}%")
+
+# %%
+report = classification_report(y_test, predictions)
+print(report)
+
+# %%
+# Plotting Accuracy
+plt.figure(figsize=(10, 6))
+plt.plot([0, 1], [0, 1], 'k--')
+plt.scatter(y_test, predictions, color='blue', alpha=0.5)
+plt.xlabel('True Values')
+plt.ylabel('Predictions')
+plt.title('SVM Predictions vs True Values')
+plt.show()
+
+# %%
+# Confusion Matrix
+cm = confusion_matrix(y_test, predictions)
+plt.figure(figsize=(10, 8))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
 
 # %%

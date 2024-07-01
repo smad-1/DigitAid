@@ -13,15 +13,13 @@ import csv
 import glob
 import numpy as np
 import tensorflow as tf
-# from tensorflow.keras.models import load_model
-# from tensorflow import keras
-# from tensorflow.keras import layers
-# from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import load_model
+from tensorflow import keras
+from tensorflow.keras import layers
+from tensorflow.keras.models import Sequential
 # %%
-import tensorflow as tf
-print("TensorFlow version:", tf.__version__)
 
-#%%
+
 def create_rectangular_button(parent, text, command, x, y, width=400, height=40):
     canvas = tk.Canvas(parent, width=width, height=height,
                        bd=0, highlightthickness=0, relief='ridge')
@@ -55,18 +53,23 @@ def create_styled_input(parent, x, y, width=400, height=40):
 window = tk.Tk()
 window.title("DigitAid - Handwritten Digit Recognition")
 
+
 # the provided image
-image_path = "C:/Users/HP/Desktop/ml project/DigitAid/digits_bg.png"  # use the local path
+image_path = "D:/IUT/CSE/6th sem/Project_DigitAid/digits_bg.png"  # use the local path
 background_image_pil = Image.open(image_path)
 background_image = ImageTk.PhotoImage(background_image_pil)
 
+
 image_width, image_height = background_image_pil.size
 
+
 window.geometry(f"{image_width}x{image_height}")
+
 
 # label with the background image
 background_label = tk.Label(window, image=background_image)
 background_label.place(relwidth=1, relheight=1)
+
 
 # Main Heading in the Welcome page
 heading = tk.Label(window, text="Welcome to DigitAid!", font=(
@@ -74,6 +77,7 @@ heading = tk.Label(window, text="Welcome to DigitAid!", font=(
 heading.pack(pady=(20, 10))  # padding for x,y axis in heading
 # center x position for all buttons
 center_x = (image_width - 400) // 2
+
 
 # for the styled input box
 t1 = create_styled_input(window, center_x, 100)
@@ -185,9 +189,10 @@ def open_train_model_window():
         messagebox.showinfo("Result", f"Accuracy = {acc}")
 
     create_rectangular_button(
-        train_window, "Train SVM Model", train_svm, center_x, 100)
+        train_window, "Train SVC Model", train_svm, center_x, 100)
 
     # this part has to be implemented
+
     def train_cnn():
         import pandas as pd
         from sklearn.utils import shuffle
@@ -243,30 +248,38 @@ def open_train_model_window():
 
 create_rectangular_button(window, "Train Model",
                           open_train_model_window, center_x, 250)
+
+
 def open_how_to_use_window():
     how_to_use_window = tk.Toplevel(window)
     how_to_use_window.title("How to Use DigitAid")
     how_to_use_window.geometry(f"{image_width}x{image_height}")
-    how_to_use_background_label = tk.Label(how_to_use_window, image=background_image)
+    how_to_use_background_label = tk.Label(
+        how_to_use_window, image=background_image)
     how_to_use_background_label.place(relwidth=1, relheight=1)
-    how_to_use_heading = tk.Label(how_to_use_window, text="How to Use DigitAid", font=('Aerial', 20, 'bold'), bg='lightblue', fg='black')
+    how_to_use_heading = tk.Label(how_to_use_window, text="How to Use DigitAid", font=(
+        'Aerial', 20, 'bold'), bg='lightblue', fg='black')
     how_to_use_heading.pack(pady=(20, 10))
-    
+
     instructions = [
-        
+
+
         "1. Give the input from  digits (0-9) for which you want to provide data.",
         "2. Then use the 'Capture Data' button to provide your handwritten digit samples.",
         "3. To generate a dataset from the captured images use the 'Generate Dataset' button.",
-        "4. To train a model (SVM or CNN) use the 'Train Model' button.",
-        "5. Finally Use the 'Live Prediction' button to test the trained model on new handwritten digits ",
-        "and get the prediction of your written digits."
+        "4. To train a model (SVC or CNN) use the 'Train Model' button.",
+        "5. Finally use the 'Live Prediction' button to predict handwritten digits using any of our 3 datasets",
     ]
-    
+
     for instruction in instructions:
-        label = tk.Label(how_to_use_window, text=instruction, font=('Aerial', 15), bg='lightblue', fg='blue', anchor='w', justify='left')
+        label = tk.Label(how_to_use_window, text=instruction, font=(
+            'Aerial', 15), bg='lightblue', fg='blue', anchor='w', justify='left')
         label.pack(fill='both', padx=20, pady=5)
 
-create_rectangular_button(window, "How to Use", open_how_to_use_window, center_x, 350)
+
+create_rectangular_button(window, "How to Use",
+                          open_how_to_use_window, center_x, 350)
+
 
 def open_live_prediction_window():
     prediction_window = tk.Toplevel(window)
@@ -293,7 +306,7 @@ def open_live_prediction_window():
         return roi
 
     def predict_self_made():
-        os.startfile("C:/Users/HP/Desktop/Paint - Shortcut.lnk")
+        os.startfile("C:/Users/GIGABYTE/Desktop/Paint - Shortcut.lnk")
         model = joblib.load("models/svm_self_dataset")
         cnn_model = tf.keras.models.load_model('models/cnn_self_dataset.keras')
         images_folder = "predictions/"
@@ -309,8 +322,8 @@ def open_live_prediction_window():
             im_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
             im_gray = cv2.GaussianBlur(im_gray, (15, 15), 0)
 
-            ret, im_th = cv2.threshold(im_gray, 100, 255, cv2.THRESH_BINARY)
-            roi = cv2.resize(im_th, (28, 28), interpolation=cv2.INTER_AREA)
+            # ret, im_th = cv2.threshold(im_gray, 100, 255, cv2.THRESH_BINARY)
+            roi = cv2.resize(im_gray, (28, 28), interpolation=cv2.INTER_AREA)
 
             rows, cols = roi.shape
 
@@ -331,10 +344,10 @@ def open_live_prediction_window():
             cnn_predictions = cnn_model.predict(cnn_roi)
             cnn_predicted_digit = np.argmax(cnn_predictions)
 
-            print("SVM Prediction:", predictions[0])
+            print("SVC Prediction:", predictions[0])
             print("CNN Prediction:", cnn_predicted_digit)
 
-            cv2.putText(im, "SVM: " + str(predictions[0]) + " CNN: " + str(cnn_predicted_digit),
+            cv2.putText(im, "SVC: " + str(predictions[0]) + " CNN: " + str(cnn_predicted_digit),
                         (20, 20), 0, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
 
             cv2.startWindowThread()
@@ -348,7 +361,7 @@ def open_live_prediction_window():
 
     def predict_aug_cnn():
         # Open the Paint application or any other drawing tool
-        os.startfile("C:/Users/HP/Desktop/Paint - Shortcut.lnk")
+        os.startfile("C:/Users/GIGABYTE/Desktop/Paint - Shortcut.lnk")
 
         # Load the augmented CNN model
         model = tf.keras.models.load_model("models/augmented_cnn.keras")
@@ -371,7 +384,9 @@ def open_live_prediction_window():
 
             # Resize and expand dimensions
             im_resized = cv2.resize(im_rgb, (180, 180))
-            X_predict = np.expand_dims(im_resized, axis=0)
+            im_scaled = im_resized / 255.0
+            X_predict = np.expand_dims(im_scaled, axis=0)
+            X_predict = np.expand_dims(X_predict, axis=-1)
 
             # Make predictions
             predictions = model.predict(X_predict)
@@ -396,12 +411,16 @@ def open_live_prediction_window():
     # need to implement this
 
     def predict_mnist_svm():
-        os.startfile("C:/Users/HP/Desktop/Paint - Shortcut.lnk")
+        os.startfile("C:/Users/GIGABYTE/Desktop/Paint - Shortcut.lnk")
         # model = joblib.load("models/svm_mnist")
-        model, pca = joblib.load("models/svm_mnist")
+        model, pca, scaler = joblib.load("models/svm_mnist")
         images_folder = "predictions/"
 
         time.sleep(15)
+
+        def binarize_image(data, threshold=128):
+            binarized_data = np.where(data > threshold, 255, 0)
+            return binarized_data
 
         while True:
             time.sleep(8)
@@ -410,9 +429,9 @@ def open_live_prediction_window():
             img.save(images_folder+"img.png")
             im = cv2.imread(images_folder+"img.png")
             im_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-            im_gray = cv2.GaussianBlur(im_gray, (15, 15), 0)
+            # im_gray = cv2.GaussianBlur(im_gray, (15, 15), 0)
 
-            ret, im_th = cv2.threshold(im_gray, 100, 255, cv2.THRESH_BINARY)
+            ret, im_th = cv2.threshold(im_gray, 128, 255, cv2.THRESH_BINARY)
             roi = cv2.resize(im_th, (28, 28), interpolation=cv2.INTER_AREA)
 
             rows, cols = roi.shape
@@ -422,8 +441,8 @@ def open_live_prediction_window():
             for i in range(rows):
                 for j in range(cols):
                     k = roi[i, j]
-                    if k > 100:
-                        k = 1
+                    if k > 128:
+                        k = 255
                     else:
                         k = 0
                     X_predict.append(k)
@@ -431,8 +450,11 @@ def open_live_prediction_window():
             # Ensure X_predict is a 2D array
             X_predict = np.array(X_predict).reshape(1, -1)
 
+            # Scale the input data using the same scaler used during training
+            X_predict_scaled = scaler.transform(X_predict)
+
             # Apply PCA transformation
-            X_predict_pca = pca.transform(X_predict)
+            X_predict_pca = pca.transform(X_predict_scaled)
 
             predictions = model.predict(X_predict_pca)
             print("Prediction:", predictions[0])
@@ -449,18 +471,20 @@ def open_live_prediction_window():
         cv2.destroyAllWindows()
 
     create_rectangular_button(
-        prediction_window, "Self Made Dataset [SVM + CNN]", predict_self_made, center_x, 100)
+        prediction_window, "Self Made Dataset [SVC + CNN]", predict_self_made, center_x, 100)
     create_rectangular_button(
         prediction_window, "Augmented Dataset [CNN]", predict_aug_cnn, center_x, 150)
     create_rectangular_button(
-        prediction_window, "MNIST Dataset [SVM]", predict_mnist_svm, center_x, 200)
+        prediction_window, "MNIST Dataset [SVC]", predict_mnist_svm, center_x, 200)
 
 
 create_rectangular_button(window, "Live prediction",
                           open_live_prediction_window, center_x, 300)
 
+
 # reference to the background image to avoid garbage collection
 window.background_image = background_image
+
 
 window.mainloop()
 # %%
